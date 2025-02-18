@@ -1,0 +1,289 @@
+{% extends "base.html" %}
+
+{% block title %}Modules{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Manage Modules ({{ total_modules }})</h3>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadModal">
+            Upload Modules
+        </button>
+    </div>
+
+    <!-- Search and Filters Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="searchForm" class="row g-3 align-items-end">
+                <!-- Search Input -->
+                <div class="col-md-6">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search modules...">
+                </div>
+
+                <!-- Status Filter -->
+                <div class="col-md-2">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="all" {% if status_filter == 'all' %}selected{% endif %}>All</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending Review</option>
+                        <option value="reviewed" {% if status_filter == 'reviewed' %}selected{% endif %}>Reviewed</option>
+                    </select>
+                </div>
+
+                <!-- Discipline Filter -->
+                <div class="col-md-2">
+                    <label for="code_prefix" class="form-label">Discipline</label>
+                    <select class="form-select" id="code_prefix" name="code_prefix">
+                        <option value="">All Disciplines</option>
+                        {% for prefix in code_prefixes %}
+                            <option value="{{ prefix }}" {% if code_prefix and code_prefix == prefix %}selected{% endif %}>
+                                {{ prefix }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort Options -->
+                <input type="hidden" name="sort" id="sort" value="{{ sort_by }}">
+                <input type="hidden" name="direction" id="direction" value="{{ sort_direction }}">
+
+                <!-- Submit and Clear Buttons -->
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100 mb-2">Apply Filters</button>
+                    <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="uploadModalLabel">
+                        <i class="bi bi-cloud-upload"></i> Upload Modules
+                    </h5>
+                    <button type="button" class="btn-close text-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="uploadForm" action="{{ url_for('admin.upload_modules') }}" method="POST" enctype="multipart/form-data">
+                        {{ upload_form.hidden_tag() }}
+    
+                        <!-- File Upload Section -->
+                        <div class="mb-4">
+                            <label for="file" class="form-label fw-bold">
+                                <i class="bi bi-file-earmark-excel"></i> Select Excel File
+                            </label>
+                            {{ upload_form.file(class="form-control", accept=".xlsx,.xls") }}
+                            <small class="form-text text-muted">
+                                <i class="bi bi-info-circle"></i> Supported formats: <strong>.xlsx, .xls</strong>
+                            </small>
+                        </div>
+    
+                        <!-- Upload Instructions -->
+                        <div class="alert alert-info p-3">
+                            <h6 class="fw-bold"><i class="bi bi-exclamation-circle"></i> Upload Guidelines</h6>
+                            <ul class="mb-2">
+                                <li>Required columns: <strong>Module Code, Name, Level, Tutor</strong></li>
+                                <li>Optional column: <strong>In Use (Y/N)</strong></li>
+                            </ul>
+                            <hr class="my-2">
+                            <p class="mb-0">For bulk data retrieval:</p>
+                            <ol class="small">
+                                <li>Go to <strong>MOD</strong> section.</li>
+                                <li>Tick the <strong>In Use</strong> box.</li>
+                                <li>Enter <strong>School</strong> as <code>SSEN</code>.</li>
+                                <li>Retrieve records and select <strong>All – Gen</strong>.</li>
+                                <li>Print letters using letter code <code>EPS_FAC_L01</code>.</li>
+                                <li>Create an HTML file, save it, and open it.</li>
+                                <li>Copy-paste data into Excel and format columns accordingly.</li>
+                            </ol>
+                        </div>
+    
+                        <!-- Upload Progress -->
+                        <div id="uploadProgress" class="progress mb-3 d-none">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar"></div>
+                        </div>
+    
+                        <!-- Error & Warning Messages -->
+                        <div id="uploadError" class="alert alert-danger d-none">
+                            <i class="bi bi-x-circle"></i> An error occurred. Please try again.
+                        </div>
+                        <div id="uploadWarnings" class="alert alert-warning d-none">
+                            <i class="bi bi-exclamation-triangle"></i> Some records have missing fields.
+                        </div>
+    
+                        <!-- Upload Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2" id="uploadButton">
+                            <span class="spinner-border spinner-border-sm d-none" id="uploadSpinner"></span>
+                            <i class="bi bi-upload"></i> <span id="uploadButtonText">Upload</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> 
+    
+    <!-- Modules Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <div class="card-body p-0"> 
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="thead-light sticky-top bg-white"> 
+                        <tr>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('admin.view_modules', sort='module_code',
+                                           direction='desc' if sort_by == 'module_code' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Code</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_code' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 200px">
+                                <a href="{{ url_for('admin.view_modules', sort='module_name',
+                                           direction='desc' if sort_by == 'module_name' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Name</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_name' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 100px">Level</th>
+                            <th class="px-3" style="min-width: 100px">Status</th>
+                            <th class="px-3" style="min-width: 150px">Module Lead</th>
+                            <th class="px-3" style="min-width: 150px">Reviewed By</th>
+                            <th class="px-3" style="min-width: 120px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in modules %}
+                            <tr>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 200px" title="{{ module.module_code }}">
+                                        {{ module.module_code }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 300px" title="{{ module.module_name }}">
+                                        {{ module.module_name }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 100px" title="Level {{ module.level }}">
+                                        Level {{ module.level }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <span class="badge {{ 'bg-success' if module.review_submitted else 'bg-warning' }}">
+                                        {{ 'Reviewed' if module.review_submitted else 'Pending' }}
+                                    </span>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 150px" title="{{ module.module_lead }}">
+                                        {{ module.module_lead or 'N/A' }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 150px" title="{{ module.reviewer_name if module.review_submitted else 'N/A' }}">
+                                        {% if module.review_submitted %}
+                                            {{ module.reviewer_name }}
+                                        {% else %}
+                                            N/A
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <div class="btn-group" role="group">
+                                        <a href="{{ url_for('admin.edit_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
+                                           class="btn btn-sm btn-outline-primary"
+                                           title="Edit Module">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        {% if not module.review_submitted %}
+                                        <a href="{{ url_for('admin.review_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
+                                           class="btn btn-sm btn-outline-success"
+                                           title="Review Module">
+                                            <i class="fas fa-check-circle"></i>
+                                        </a>
+                                        {% endif %}
+                                        <a href="{{ url_for('admin.view_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
+                                           class="btn btn-sm btn-outline-info"
+                                           title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center py-4 text-muted">
+                                    <i class="fas fa-inbox fa-2x mb-2"></i>
+                                    <p class="mb-0">No modules found</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Small screen note -->
+        <div class="d-block d-md-none card-footer py-2">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Scroll horizontally to view more columns
+            </small>
+        </div>
+
+        <!-- Pagination -->
+        {% include 'includes/pagination.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/modules.js') }}"></script>
+<script>
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const formData = new FormData(form);
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const spinner = document.getElementById('uploadSpinner');
+    const btnText = document.getElementById('uploadButtonText');
+    const progressBar = document.getElementById('uploadProgress');
+    
+    // Show loading state
+    submitBtn.disabled = true;
+    spinner.classList.remove('d-none');
+    btnText.textContent = 'Uploading...';
+    progressBar.classList.remove('d-none');
+    
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect;
+        } else {
+            throw new Error(data.message || 'Upload failed');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        // Reset form state
+        submitBtn.disabled = false;
+        spinner.classList.add('d-none');
+        btnText.textContent = 'Upload';
+        progressBar.classList.add('d-none');
+    });
+});
+</script>
+{% endblock %}

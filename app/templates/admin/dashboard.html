@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">Admin's Dashboard</h2>
+            <p class="text-muted">Academic Year: {{ stats.academic_year }}/{{ stats.academic_year + 1 }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" id="refreshDashboard">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('admin.view_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Modules</h6>
+                            <h3 id="totalModules" class="mb-0">{{ stats.get('total_modules', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="fas fa-book fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('admin.view_completed_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Reviewed Modules</h6>
+                            <h3 id="completedReviews" class="mb-0">{{ stats.get('completed_reviews', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('admin.view_pending_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Pending Reviews</h6>
+                            <h3 id="pendingReviews" class="mb-0">{{ stats.get('pending_reviews', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="fas fa-clock fa-2x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('admin.view_users') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Users</h6>
+                            <h3 id="totalUsers" class="mb-0">{{ stats.get('total_users', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="fas fa-users fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row mb-4">
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title">Module Review Status</h5>
+                    <small class="text-muted">Pending vs. Completed Modules</small>
+                </div>
+                <div class="card-body">
+                    <div id="modulesPieChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-md-12 mb-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title">User Distribution</h5>
+                    <small class="text-muted">Admins vs. Module Leads</small>
+                </div>
+                <div class="card-body">
+                    <div id="usersBarChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script id="dashboardStats" type="application/json">
+    {{ stats | tojson | safe }}
+</script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Refresh dashboard when academic year changes
+    document.getElementById('academicYear').addEventListener('change', function() {
+        document.getElementById('refreshDashboard').click();
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,321 @@
+{% extends "base.html" %}
+
+{% block title %}View Module - {{ module.module_code }}{% endblock %}
+
+{% block head %}
+{{ super() }}
+<meta name="module-id" content="{{ module._id }}">
+{% endblock %}
+
+{% block content %}
+<!-- Loading Indicator (Initially visible) -->
+<div id="loadingIndicator" class="text-center py-5" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2 text-muted">Loading module details...</p>
+</div>
+
+<!-- Content Container (Initially hidden) -->
+<div id="moduleContent" class="container mt-4">
+    <!-- Header Card -->
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+            <div>
+                <h4 class="mb-0 module-code" data-field="module-code">{{ module.module_code }}</h4>
+                <small class="module-name" data-field="module-name">{{ module.module_name }}</small>
+            </div>
+            <a href="{{ url_for('admin.view_completed_modules') }}" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i>Back to Modules
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Module Details -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">Module Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Module Code</label>
+                                <p class="h6">{{ module.module_code }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Level</label>
+                                <p class="h6">{{ module.level }}</p>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <label class="text-muted small">Module Name</label>
+                                <p class="h6">{{ module.module_name }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Module Lead</label>
+                                <p class="h6">
+                                    {{ module.module_lead if module.module_lead else 'Unknown' }}
+                                    
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Status</label>
+                                <p class="h6">
+                                    <span class="badge {{ 'bg-success' if module.in_use else 'bg-secondary' }}">
+                                        {{ 'Active' if module.in_use else 'Inactive' }}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Status Card -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="card-title mb-0 text-white">Review Status</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="d-inline-block p-3 rounded-circle 
+                             {{ 'bg-success' if module.review_submitted else 'bg-warning' }} 
+                             bg-opacity-10 mb-3">
+                            <i class="fas {{ 'fa-check' if module.review_submitted else 'fa-clock' }} fa-2x 
+                                {{ 'text-success' if module.review_submitted else 'text-warning' }}">
+                            </i>
+                        </div>
+                        <h6 class="mb-0">{{ 'Reviewed' if module.review_submitted else 'Pending Review' }}</h6>
+                    </div>
+
+                    {% if module.reviewed_by %}
+                    <div class="border-top pt-3">
+                        <div class="detail-item">
+                            <label class="text-muted small d-block">Last Update</label>
+                            <p class="h6 mb-1">{{ reviewer_name }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar-alt me-1"></i>
+                                {% if module.review_date %}
+                                    {{ module.review_date|datetime }}
+                                {% else %}
+                                    Date not recorded
+                                {% endif %}
+                            </small>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Review Details Card -->
+        <div class="col-12 mt-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0 text-white">Review Details</h5>
+                    {% if review %}
+                    <a href="{{ url_for('admin.edit_review', module_id=module._id['$oid']) }}" class="btn btn-light btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit Review
+                    </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% if review %}
+                    <div class="row g-4">
+                        <!-- Enhancement Plan Update -->
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <label class="text-muted small">Enhancement Plan Update</label>
+                                <p class="border p-2 rounded">{{ review.enhancement_plan_update or 'Not provided' }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Student Insights -->
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Student Attainment</label>
+                                <p class="border p-2 rounded">{{ review.student_attainment or 'Not provided' }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="detail-item">
+                                <label class="text-muted small">Student Feedback</label>
+                                <p class="border p-2 rounded">{{ review.student_feedback or 'Not provided' }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Risks -->
+                        <div class="col-12">
+                            <div class="detail-item">
+                                <label class="text-muted small">Identified Risks</label>
+                                <p class="border p-2 rounded">{{ review.risks or 'No risks identified' }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Ratings -->
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <label class="text-muted small">Student Engagement</label>
+                                <p class="border p-2 rounded">
+                                    {% if review.engagement_rating == 4 %}
+                                        Strongly Agree
+                                    {% elif review.engagement_rating == 3 %}
+                                        Agree
+                                    {% elif review.engagement_rating == 2 %}
+                                        Disagree
+                                    {% elif review.engagement_rating == 1 %}
+                                        Strongly Disagree
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <label class="text-muted small">Learning Environment</label>
+                                <p class="border p-2 rounded">
+                                    {% if review.learning_environment_rating == 4 %}
+                                        Strongly Agree
+                                    {% elif review.learning_environment_rating == 3 %}
+                                        Agree
+                                    {% elif review.learning_environment_rating == 2 %}
+                                        Disagree
+                                    {% elif review.learning_environment_rating == 1 %}
+                                        Strongly Disagree
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="detail-item">
+                                <label class="text-muted small">Timetabling</label>
+                                <p class="border p-2 rounded">
+                                    {% if review.timetabling_rating == 4 %}
+                                        Strongly Agree
+                                    {% elif review.timetabling_rating == 3 %}
+                                        Agree
+                                    {% elif review.timetabling_rating == 2 %}
+                                        Disagree
+                                    {% elif review.timetabling_rating == 1 %}
+                                        Strongly Disagree
+                                    {% else %}
+                                        Not rated
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">
+                        No review has been submitted for this module yet.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Enhancement Plans Section -->
+        <div class="col-12 mt-4">
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center bg-primary">
+                    <h5 class="card-title mb-0 text-white">Enhancement Plans</h5>
+                    <span class="badge bg-light text-primary">
+                        {{ review.enhancement_plans|length if review and review.enhancement_plans else 0 }} Plans
+                    </span>
+                </div>
+                <div class="card-body">
+                    {% if review and review.enhancement_plans %}
+                        <div class="row g-4">
+                            {% for plan in review.enhancement_plans %}
+                                <div class="col-md-6">
+                                    <div class="card h-100 enhancement-plan-card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <h6 class="mb-0 text-primary">{{ plan.plan }}</h6>
+                                            <span class="badge bg-primary">{{ plan.category|default('General', true) }}</span>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="enhancement-details">
+                                                <h6 class="text-muted small">Implementation Details:</h6>
+                                                <p class="card-text">{{ plan.details or 'No details provided' }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="fas fa-clipboard-list fa-2x text-muted mb-3"></i>
+                            <p class="text-muted mb-0">No enhancement plans have been added yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit History Card (Compact Version) -->
+        {% if review and review.edit_history %}
+        <div class="col-12 mt-4">
+            <div class="card shadow-sm border-light">
+                <div class="card-header d-flex justify-content-between align-items-center bg-light">
+                    <h6 class="card-title mb-0 text-muted">
+                        <i class="fas fa-history me-2"></i>Edit History
+                    </h6>
+                    <span class="badge bg-secondary">
+                        {{ review.edit_history|length }} Changes
+                    </span>
+                </div>
+                <div class="card-body p-2">
+                    <div class="timeline-compact">
+                        {% for edit in review.edit_history %}
+                        <div class="timeline-item-compact">
+                            <div class="timeline-marker-compact"></div>
+                            <div class="timeline-content-compact">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="text-primary">{{ edit.editor_name }}</small>
+                                        <small class="text-muted d-block">{{ edit.action }}</small>
+                                    </div>
+                                    <small class="text-muted ms-2">{{ edit.edit_date|datetime }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+// Initialize with server-side data
+const moduleData = {{ module|tojson|safe }};
+const reviewData = {{ review|tojson|safe if review else 'null'|safe }};
+</script>
+<script src="{{ url_for('static', filename='js/view_module.js') }}"></script>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/view_module.css') }}">
+{% endblock %}

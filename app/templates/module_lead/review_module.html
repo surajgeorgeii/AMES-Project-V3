@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Review Module{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary bg-gradient text-white d-flex justify-content-between align-items-center py-3">
+            <h4 class="mb-0">Review Module: {{ module.module_code }}</h4>
+            <a href="{{ url_for('module_lead.view_pending_modules') }}" class="btn btn-light">
+                <i class="fas fa-arrow-left me-1"></i> Back to Modules
+            </a>
+        </div>
+        
+        <div class="card-body">
+            <form method="POST" action="{{ url_for('module_lead.review_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}">
+                {{ form.csrf_token }}
+                
+                <!-- Module Info Section -->
+                <div class="bg-light p-3 rounded mb-4">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label text-muted small">Module Name</label>
+                            <input type="text" class="form-control form-control-lg" value="{{ module.module_name }}" readonly>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label text-muted small">Module Code</label>
+                            <input type="text" class="form-control" value="{{ module.module_code }}" readonly>
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label text-muted small">Module Lead</label>
+                            <input type="text" class="form-control" value="{{ module.module_lead if module.module_lead else 'Unknown' }}" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small">Level</label>
+                            <input type="text" class="form-control" value="Level {{ module.level }}" readonly>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label text-muted small">Status</label>
+                            <div class="form-control {{ 'text-success' if module.in_use else 'text-danger' }}">
+                                <i class="fas fa-circle me-1 small"></i>
+                                {{ 'Active' if module.in_use else 'Inactive' }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Review Sections -->
+                <div class="row g-4">
+                    <!-- Enhancement Plan Update -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-secondary">Enhancement Plan Update <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Document the progress and changes made based on previous enhancement plans"></i></h5>
+                            </div>
+                            <div class="card-body">
+                                <textarea class="form-control" name="enhancementPlan" rows="4" required></textarea>
+                                <div class="form-text">Provide a summary of implemented changes</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Insights Section -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-secondary">Key Insights <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Key observations and findings from the module delivery"></i></h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Student Attainment <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Overview of student performance and achievement levels"></i></label>
+                                        <textarea class="form-control" name="studentAttainment" rows="3" required></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Student Feedback <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Summary of student comments and evaluations"></i></label>
+                                        <textarea class="form-control" name="studentFeedback" rows="3" required></textarea>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Risks <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Identify potential challenges or issues that need attention"></i></label>
+                                        <textarea class="form-control" name="risks" rows="3" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ratings Section -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-secondary">Ratings <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Assessment of key module delivery aspects"></i></h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Student Engagement <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Level of student participation and interaction in the module"></i></label>
+                                        <select class="form-select" name="engagement" required>
+                                            <option value="">Select Rating...</option>
+                                            <option>Strongly Agree</option>
+                                            <option>Agree</option>
+                                            <option>Disagree</option>
+                                            <option>Strongly Disagree</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Learning Environment <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Quality and effectiveness of the teaching and learning space"></i></label>
+                                        <select class="form-select" name="learningEnvironment" required>
+                                            <option value="">Select Rating...</option>
+                                            <option>Strongly Agree</option>
+                                            <option>Agree</option>
+                                            <option>Disagree</option>
+                                            <option>Strongly Disagree</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-semibold">Timetabling <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Effectiveness of session scheduling and time allocation"></i></label>
+                                        <select class="form-select" name="timetabling" required>
+                                            <option value="">Select Rating...</option>
+                                            <option>Strongly Agree</option>
+                                            <option>Agree</option>
+                                            <option>Disagree</option>
+                                            <option>Strongly Disagree</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Enhancement Plans Section -->
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0 text-secondary">Enhancement Plans <i class="fas fa-info-circle info-icon" data-bs-toggle="tooltip" title="Future improvements and action plans for the module"></i></h5>
+                            </div>
+                            <div class="card-body">
+                                <div id="enhancementPlans">
+                                    <div class="enhancement-item mb-3 p-3 border rounded bg-light">
+                                        <div class="row">
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label fw-semibold">Enhancement Plan 1</label>
+                                                <select class="form-select mb-2" name="enhancementPlan1" 
+                                                        onchange="showEnhancementDetails(this, 1)" required>
+                                                    <option value="">Select Enhancement Plan</option>
+                                                    {% for option in enhancement_options %}
+                                                    <option value="{{ option.value }}" data-description="{{ option.description }}">
+                                                        {{ option.label }}
+                                                    </option>
+                                                    {% endfor %}
+                                                </select>
+                                                <div class="form-text plan-description text-primary fst-italic"></div>
+                                            </div>
+                                            <div class="col-md-12">
+                                                <label class="form-label fw-semibold">Details</label>
+                                                <textarea class="form-control" name="enhancementDetailsText1" 
+                                                          rows="4" required
+                                                          placeholder="Provide specific details about how this enhancement plan will be implemented..."></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <button type="button" class="btn btn-outline-primary" onclick="addEnhancementPlan()">
+                                        <i class="fas fa-plus-circle me-1"></i> Add Another Enhancement Plan
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="button" class="btn btn-outline-secondary me-2" onclick="window.history.back()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i> Submit Review
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.info-icon {
+    font-size: 0.85em;
+    color: #6c757d;
+    opacity: 0.75;
+    transition: opacity 0.2s ease;
+    margin-left: 4px;
+    cursor: help;
+}
+
+.info-icon:hover {
+    opacity: 1;
+}
+</style>
+
+<!-- Update the JavaScript for better enhancement plan handling -->
+<script>
+let planCount = 1;
+const enhancementOptions = {{ enhancement_options|tojson|safe }};
+
+function showEnhancementDetails(selectElement, index) {
+    const descriptionDiv = selectElement.closest('.enhancement-item').querySelector('.plan-description');
+    const selectedOption = enhancementOptions.find(opt => opt.value === selectElement.value);
+    
+    if (selectedOption) {
+        descriptionDiv.textContent = selectedOption.description;
+        descriptionDiv.style.display = 'block';
+    } else {
+        descriptionDiv.style.display = 'none';
+    }
+}
+
+function addEnhancementPlan() {
+    planCount++;
+    const container = document.getElementById("enhancementPlans");
+    
+    const template = `
+        <div class="enhancement-item mb-3 p-3 border rounded bg-light">
+            <div class="row">
+                <div class="col-md-12 mb-3">
+                    <label class="form-label fw-semibold">Enhancement Plan ${planCount}</label>
+                    <select class="form-select mb-2" name="enhancementPlan${planCount}" 
+                            onchange="showEnhancementDetails(this, ${planCount})" required>
+                        <option value="">Select Enhancement Plan</option>
+                        ${enhancementOptions.map(opt => 
+                            `<option value="${opt.value}" data-description="${opt.description}">
+                                ${opt.label}
+                            </option>`
+                        ).join('')}
+                    </select>
+                    <div class="form-text plan-description text-primary fst-italic"></div>
+                </div>
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Details</label>
+                    <textarea class="form-control" name="enhancementDetailsText${planCount}" 
+                              rows="4" required
+                              placeholder="Provide specific details about how this enhancement plan will be implemented..."></textarea>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.insertAdjacentHTML('beforeend', template);
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+</script>
+{% endblock %}

@@ -1,0 +1,345 @@
+{% extends "base.html" %}
+{% block title %} Users {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>User Management</h2>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+            Create New User
+        </button>
+    </div>
+
+    <!-- Search and Filter Controls -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <form class="d-flex" method="GET">
+                <input type="text" name="search" class="form-control me-2" placeholder="Search users..." 
+                       value="{{ search_query }}"
+                       autocomplete="off">
+                <input type="hidden" name="status" value="{{ status_filter }}">
+                <input type="hidden" name="sort" value="{{ sort_by }}">
+                <input type="hidden" name="direction" value="{{ sort_direction }}">
+                <button class="btn btn-outline-primary" type="submit">Search</button>
+                {% if search_query %}
+                    <a href="{{ url_for('admin.view_users', status=status_filter, sort=sort_by, direction=sort_direction) }}" 
+                       class="btn btn-outline-secondary ms-2">Clear</a>
+                {% endif %}
+            </form>
+        </div>
+        <div class="col-md-6">
+            <div class="btn-group float-end" role="group">
+                    <a href="{{ url_for('admin.view_users', status='all', search=search_query, sort=sort_by, direction=sort_direction) }}" 
+                   class="btn btn-outline-secondary {{ 'active' if status_filter == 'all' or not status_filter }}">
+                    All
+                </a>
+                <a href="{{ url_for('admin.view_users', status='active', search=search_query, sort=sort_by, direction=sort_direction) }}" 
+                   class="btn btn-outline-secondary {{ 'active' if status_filter == 'active' }}">
+                    Active
+                </a>
+                <a href="{{ url_for('admin.view_users', status='flagged', search=search_query, sort=sort_by, direction=sort_direction) }}" 
+                   class="btn btn-outline-secondary {{ 'active' if status_filter == 'flagged' }}">
+                    Flagged
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create User Modal -->
+    <div class="modal fade" id="createUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createUserForm" method="POST" action="{{ url_for('admin.create_user') }}" class="needs-validation">
+                        <div class="mb-3">
+                            {{ form.username.label(class="form-label") }}
+                            {{ form.username(class="form-control", required=True) }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.email.label(class="form-label") }}
+                            {{ form.email(class="form-control", required=True) }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.password.label(class="form-label") }}
+                            {{ form.password(class="form-control", required=True) }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            {{ form.role.label(class="form-label") }}
+                            {{ form.role(class="form-select", required=True) }}
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div id="formError" class="alert alert-danger d-none"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Create User
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editUserForm" method="POST" class="needs-validation">
+                        <input type="hidden" id="editUserId" name="userId">
+                        <div class="mb-3">
+                            <label for="editUsername" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editUsername" name="username" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editRole" class="form-label">Role</label>
+                            <select class="form-select" id="editRole" name="role" required>
+                                <option value="admin">Admin</option>
+                                <option value="module_lead">Module Lead</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div id="editFormError" class="alert alert-danger d-none"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Save Changes
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email User Modal -->
+    <div class="modal fade" id="emailUserModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Email</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="emailUserForm" method="POST" class="needs-validation">
+                        <input type="hidden" id="emailUserId" name="userId">
+                        <div class="mb-3">
+                            <label for="emailSubject" class="form-label">Subject</label>
+                            <input type="text" class="form-control" id="emailSubject" name="subject" required>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="emailMessage" name="message" rows="5" required></textarea>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div id="emailFormError" class="alert alert-danger d-none"></div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Send Email
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card">
+        <div class="table-responsive">
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="thead-light sticky-top bg-white">
+                        <tr>
+                            <th class="px-3" style="min-width: 150px">
+                                <a href="{{ url_for('admin.view_users', sort='username',
+                                           direction='desc' if sort_by == 'username' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Username</span>
+                                    <i class="fas fa-sort{% if sort_by == 'username' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 200px">
+                                <a href="{{ url_for('admin.view_users', sort='email',
+                                           direction='desc' if sort_by == 'email' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Email</span>
+                                    <i class="fas fa-sort{% if sort_by == 'email' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 120px">Role</th>
+                            <th class="px-3" style="min-width: 100px">Status</th>
+                            <th class="px-3" style="width: 100px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                        <tr>
+                            <td class="px-3">
+                                <div class="text-truncate" style="max-width: 200px" title="{{ user.get('username', 'N/A') }}">
+                                    {{ user.get('username', 'N/A') }}
+                                </div>
+                            </td>
+                            <td class="px-3">
+                                <div class="text-truncate" style="max-width: 300px" title="{{ user.get('email', 'N/A') }}">
+                                    {{ user.get('email', 'N/A') }}
+                                </div>
+                            </td>
+                            <td class="px-3">
+                                {% set role = user.get('role', 'N/A') %}
+                                <span class="badge bg-primary">
+                                    {% if role == 'admin' %}Admin
+                                    {% elif role == 'module_lead' %}Module Lead
+                                    {% else %}{{ role }}{% endif %}
+                                </span>
+                            </td>
+                            <td class="px-3">
+                                {% set is_active = user.get('is_active', True) %}
+                                <span class="badge {% if is_active %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ "Active" if is_active else "Flagged" }}
+                                </span>
+                            </td>
+                            <td class="px-3">
+                                <div class="btn-group" role="group">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-primary" 
+                                            onclick="editUser('{{ user.get('_id', {}).get('$oid', '') }}', 
+                                                            '{{ user.get('username', '') }}',
+                                                            '{{ user.get('email', '') }}',
+                                                            '{{ user.get('role', '') }}')"
+                                            data-bs-toggle="tooltip"
+                                            title="Edit user">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-sm btn-outline-secondary" 
+                                            onclick="emailUser('{{ user.get('_id', {}).get('$oid', '') }}',
+                                                            '{{ user.get('username', '') }}',
+                                                            '{{ user.get('email', '') }}')"
+                                            data-bs-toggle="tooltip"
+                                            title="Send email">
+                                        <i class="fas fa-envelope"></i>
+                                    </button>
+                                    <form method="POST" 
+                                          action="{{ url_for('admin.toggle_user_status', user_id=user.get('_id', {}).get('$oid', '')) }}"
+                                          class="d-inline"
+                                          onsubmit="return confirm('Are you sure you want to {{ 'block' if is_active else 'unblock' }} this user?');">
+                                        <button type="submit" 
+                                                class="btn btn-sm {% if is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}"
+                                                data-bs-toggle="tooltip"
+                                                title="{{ 'Block user' if is_active else 'Unblock user' }}">
+                                            <i class="fas {% if is_active %}fa-ban{% else %}fa-check-circle{% endif %}"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-4 text-muted">
+                                <i class="fas fa-users fa-2x mb-2"></i>
+                                <p class="mb-0">No users found</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Small screen note -->
+        <div class="d-block d-md-none card-footer py-2">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Scroll horizontally to view more columns
+            </small>
+        </div>
+
+        <!-- Pagination -->
+        {% if total_pages > 1 %}
+        <div class="card-footer">
+            <nav aria-label="User navigation">
+                <ul class="pagination justify-content-end">
+                    <!-- Previous button -->
+                    <li class="page-item {{ 'disabled' if page == 1 }}">
+                        <a class="page-link" href="{{ url_for('admin.view_users', page=page-1, 
+                           search=search_query, status=status_filter, sort=sort_by, direction=sort_direction) }}"
+                           {% if page == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>Previous</a>
+                    </li>
+
+                    <!-- First two pages -->
+                    {% if total_pages > 2 %}
+                        {% for p in range(1, 3) %}
+                        <li class="page-item {{ 'active' if p == page }}">
+                            <a class="page-link" href="{{ url_for('admin.view_users', page=p,
+                               search=search_query, status=status_filter, sort=sort_by, direction=sort_direction) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+
+                        <!-- Ellipsis -->
+                        {% if total_pages > 3 %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                        {% endif %}
+
+                        <!-- Last two pages -->
+                        {% for p in range(total_pages - 1, total_pages + 1) %}
+                        <li class="page-item {{ 'active' if p == page }}">
+                            <a class="page-link" href="{{ url_for('admin.view_users', page=p,
+                               search=search_query, status=status_filter, sort=sort_by, direction=sort_direction) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                    {% else %}
+                        <!-- Show all pages if total_pages <= 2 -->
+                        {% for p in range(1, total_pages + 1) %}
+                        <li class="page-item {{ 'active' if p == page }}">
+                            <a class="page-link" href="{{ url_for('admin.view_users', page=p,
+                               search=search_query, status=status_filter, sort=sort_by, direction=sort_direction) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Next button -->
+                    <li class="page-item {{ 'disabled' if page == total_pages }}">
+                        <a class="page-link" href="{{ url_for('admin.view_users', page=page+1,
+                           search=search_query, status=status_filter, sort=sort_by, direction=sort_direction) }}"
+                           {% if page == total_pages %}tabindex="-1" aria-disabled="true"{% endif %}>Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/users.js') }}"></script>
+<script>
+    // Initialize tooltips
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+    });
+</script>
+{% endblock %}

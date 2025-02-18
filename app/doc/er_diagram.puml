@@ -1,0 +1,73 @@
+@startuml
+skinparam linetype polyline
+
+' Define User roles
+entity "User" as User {
+    * _id : ObjectId
+    * username : String
+    * email : String
+    * password : String
+    * role : String(admin, module_lead)
+    * is_active : Boolean
+    * created_at : DateTime
+}
+
+' Role Specializations
+entity "Admin" as Admin
+entity "Module Lead" as ModuleLead
+
+User ||--|| Admin : "inherits"
+User ||--|| ModuleLead : "inherits"
+
+' Modules
+entity "Module" as Module {
+    * _id : ObjectId
+    * module_code : String
+    * code_prefix : String
+    * module_name : String
+    * module_lead_id : ObjectId
+    * module_lead_name : String
+    * academic_year : Integer
+    * review_submitted : Boolean
+    * created_at : DateTime
+    * in_use : Boolean
+}
+
+' Reviews
+entity "Review" as Review {
+    * _id : ObjectId
+    * module_id : ObjectId
+    * reviewer_id : ObjectId
+    * review_date : DateTime
+    * enhancement_plan_update : String
+    * student_attainment : String
+    * student_feedback : String
+    * risks : String
+    * engagement_rating : Integer
+    * learning_environment_rating : Integer
+    * timetabling_rating : Integer
+    * enhancement_plans : Array
+    * edit_history : Array
+}
+
+' Edit History
+entity "Edit History" as EditHistory {
+    * editor_id : ObjectId
+    * edit_date : DateTime
+    * action : String
+}
+
+' Relationships
+Admin ||--|{ User : "manages"
+Admin ||--|{ Module : "assigns"
+ModuleLead ||--|{ Module : "manages"
+ModuleLead ||--|{ Review : "writes"
+Module ||--|{ Review : "has"
+Review ||--|{ EditHistory : "tracks changes"
+
+' Layout Optimization
+left to right direction
+User -[hidden]-> Module
+Module -[hidden]-> Review
+Review -[hidden]-> EditHistory
+@enduml

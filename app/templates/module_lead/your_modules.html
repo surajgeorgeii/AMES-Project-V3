@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Your Modules{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Your Modules (<span id="totalModules">{{ modules|length }}</span>)</h2>
+            <p class="text-muted mb-0">Academic Year: {{ get_academic_year() }}/{{ get_academic_year() + 1 }}</p>
+        </div>
+        <a href="{{ url_for('module_lead.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Search and Filters Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="searchForm" class="row g-3 align-items-end">
+                <!-- Search Input -->
+                <div class="col-md-8">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search modules...">
+                </div>
+
+                <!-- Code Prefix Filter -->
+                <div class="col-md-2">
+                    <label for="code_prefix" class="form-label">Discipline</label>
+                    <select class="form-select" id="code_prefix" name="code_prefix">
+                        <option value="">All Disciplines</option>
+                        {% for prefix in code_prefixes %}
+                            <option value="{{ prefix }}" {% if code_prefix and code_prefix == prefix %}selected{% endif %}>
+                                {{ prefix }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <input type="hidden" name="sort" id="sort" value="{{ sort_by }}">
+                <input type="hidden" name="direction" id="direction" value="{{ sort_direction }}">
+
+                <!-- Submit and Clear Buttons -->
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100 mb-2">Apply Filters</button>
+                    <a href="{{ url_for('module_lead.view_your_modules') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add loading indicator -->
+    <div id="tableLoadingIndicator" class="text-center py-5 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading modules...</p>
+    </div>
+
+    <!-- Modules List -->
+    <div class="card">
+        <div class="table-responsive">
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="thead-light sticky-top bg-white">
+                        <tr>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('module_lead.view_your_modules', sort='module_code',
+                                           direction='desc' if sort_by == 'module_code' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Code</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_code' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 200px">
+                                <a href="{{ url_for('module_lead.view_your_modules', sort='module_name',
+                                           direction='desc' if sort_by == 'module_name' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Name</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_name' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 120px">Review Status</th>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('module_lead.view_your_modules', sort='review_date',
+                                           direction='desc' if sort_by == 'review_date' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Last Review</span>
+                                    <i class="fas fa-sort{% if sort_by == 'review_date' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3 text-end" style="min-width: 100px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for module in modules %}
+                            <tr class="clickable-row" 
+                                onclick="window.location='{{ url_for('module_lead.view_module' if module.review_submitted else 'module_lead.review_module', module_id=module._id) }}'"
+                                style="cursor: pointer">
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 200px" title="{{ module.module_code }}">
+                                        {{ module.module_code }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    <div class="text-truncate" style="max-width: 300px" title="{{ module.module_name }}">
+                                        {{ module.module_name }}
+                                    </div>
+                                </td>
+                                <td class="px-3">
+                                    {% if module.review_submitted %}
+                                    <span class="badge bg-success">Reviewed</span>
+                                    {% else %}
+                                    <span class="badge bg-warning">Pending</span>
+                                    {% endif %}
+                                </td>
+                                <td class="px-3">
+                                    {% if module.review_date %}
+                                        {% if module.review_date is string %}
+                                            {{ module.review_date }}
+                                        {% elif module.review_date is mapping and '$date' in module.review_date %}
+                                            {{ module.review_date['$date'][:10] }}
+                                        {% else %}
+                                            {{ module.review_date.strftime('%Y-%m-%d') }}
+                                        {% endif %}
+                                    {% else %}
+                                        --
+                                    {% endif %}
+                                </td>
+                                <td class="px-3 text-end" onclick="event.stopPropagation()">
+                                    <td class="px-3">
+                                        <div class="btn-group" role="group">
+                                            {% if not module.review_submitted %}
+                                            <a href="{{ url_for('module_lead.review_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
+                                               class="btn btn-sm btn-outline-success"
+                                               title="Review Module">
+                                                <i class="fas fa-check-circle"></i>
+                                            </a>
+                                            {% endif %}
+                                            <a href="{{ url_for('module_lead.view_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
+                                               class="btn btn-sm btn-outline-info"
+                                               title="View Details">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                        <p class="mb-0">No modules found</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Small screen note -->
+        <div class="d-block d-md-none card-footer py-2">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Scroll horizontally to view more columns
+            </small>
+        </div>
+        
+        <!-- Pagination -->
+        {% include 'includes/pagination.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ml_your_modules.js') }}"></script>
+{% endblock %}

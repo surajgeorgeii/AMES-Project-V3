@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Results{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Upload Summary</h2>
+            <p class="text-muted mb-0">
+                <i class="fas fa-clock me-1"></i>
+                Completed {{ moment(timestamp).format('MMMM D, YYYY [at] h:mm A') }}
+            </p>
+        </div>
+        <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-primary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Modules
+        </a>
+    </div>
+
+    <!-- Progress Overview -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center border-end">
+                    <h3 class="display-4 mb-0">{{ stats.total_processed }}</h3>
+                    <p class="text-muted mb-0">Total Rows</p>
+                </div>
+                <div class="col-md-9">
+                    <div class="row h-100 align-items-center">
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-table fa-2x text-primary mb-2"></i>
+                                <h4>{{ stats.modules_added }}</h4>
+                                <p class="text-muted mb-0">Modules Added</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-users fa-2x text-success mb-2"></i>
+                                <h4>{{ stats.users_added }}</h4>
+                                <p class="text-muted mb-0">Users Created</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-exclamation-triangle fa-2x {% if errors|length + warnings|length > 0 %}text-warning{% else %}text-success{% endif %} mb-2"></i>
+                                <h4>{{ errors|length + warnings|length }}</h4>
+                                <p class="text-muted mb-0">Issues Found</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <div class="p-3">
+                                <i class="fas fa-calendar fa-2x text-info mb-2"></i>
+                                <h4>{{ stats.academic_year }}</h4>
+                                <p class="text-muted mb-0">Academic Year</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Message (if no issues) -->
+    {% if not errors and not warnings %}
+    <div class="card bg-success-subtle border-success mb-4">
+        <div class="card-body text-center py-4">
+            <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+            <h3 class="text-success">Upload Completed Successfully</h3>
+            <p class="text-muted mb-0">All rows were processed without any issues</p>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Issues Summary (if any) -->
+    {% if errors or warnings %}
+    <div class="row">
+        <!-- Warnings Column -->
+        <div class="col-md-6 mb-4">
+            {% if warnings %}
+            <div class="card h-100 border-warning">
+                <div class="card-header bg-warning-subtle border-warning">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                        <h5 class="mb-0 text-warning">
+                            Warnings ({{ warnings|length }}{% if has_more_warnings %}+{% endif %})
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for warning in warnings %}
+                        <div class="list-group-item bg-transparent">
+                            <i class="fas fa-exclamation-circle text-warning me-2"></i>
+                            {{ warning }}
+                        </div>
+                        {% endfor %}
+                        {% if has_more_warnings %}
+                        <div class="list-group-item bg-transparent text-muted">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Additional warnings truncated...
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Errors Column -->
+        <div class="col-md-6 mb-4">
+            {% if errors %}
+            <div class="card h-100 border-danger">
+                <div class="card-header bg-danger-subtle border-danger">
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-times-circle text-danger me-2"></i>
+                        <h5 class="mb-0 text-danger">
+                            Errors ({{ errors|length }}{% if has_more_errors %}+{% endif %})
+                        </h5>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        {% for error in errors %}
+                        <div class="list-group-item bg-transparent">
+                            <i class="fas fa-times-circle text-danger me-2"></i>
+                            {{ error }}
+                        </div>
+                        {% endfor %}
+                        {% if has_more_errors %}
+                        <div class="list-group-item bg-transparent text-muted">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Additional errors truncated...
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div class="d-flex justify-content-between">
+        <button onclick="window.print()" class="btn btn-outline-secondary">
+            <i class="fas fa-print me-2"></i>Print Summary
+        </button>
+        <div>
+            <a href="{{ url_for('admin.view_modules') }}" class="btn btn-secondary me-2">
+                View All Modules
+            </a>
+            <a href="{{ url_for('admin.view_pending_modules') }}" class="btn btn-primary">
+                View Pending Reviews
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+    @media print {
+        .btn { display: none !important; }
+        .card { border: 1px solid #dee2e6 !important; }
+        .bg-success-subtle { background-color: #d1e7dd !important; }
+        .bg-warning-subtle { background-color: #fff3cd !important; }
+        .bg-danger-subtle { background-color: #f8d7da !important; }
+    }
+</style>
+{% endblock %}

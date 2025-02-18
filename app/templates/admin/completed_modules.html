@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Completed Modules{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Completed Module Reviews (<span id="totalModules">{{ total_modules }}</span>)</h2>
+            <p class="text-muted mb-0">Academic Year: {{ get_academic_year() }}/{{ get_academic_year() + 1 }}</p>
+        </div>
+        <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-1"></i> Back to All Modules
+        </a>
+    </div>
+
+    <!-- Search and Filters Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form id="searchForm" class="row g-3 align-items-end">
+                <!-- Search Input -->
+                <div class="col-md-8">
+                    <label for="search" class="form-label">Search</label>
+                    <input type="text" class="form-control" id="search" name="search" value="{{ search_query }}" placeholder="Search modules...">
+                </div>
+
+                <!-- Code Prefix Filter -->
+                <div class="col-md-2">
+                    <label for="code_prefix" class="form-label">Discipline</label>
+                    <select class="form-select" id="code_prefix" name="code_prefix">
+                        <option value="">All Disciplines</option>
+                        {% for prefix in code_prefixes %}
+                            <option value="{{ prefix }}" {% if code_prefix and code_prefix == prefix %}selected{% endif %}>
+                                {{ prefix }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Sort Options -->
+                <input type="hidden" name="sort" id="sort" value="{{ sort_by }}">
+                <input type="hidden" name="direction" id="direction" value="{{ sort_direction }}">
+
+                <!-- Submit and Clear Buttons -->
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-outline-primary w-100 mb-2">Apply Filters</button>
+                    <a href="{{ url_for('admin.view_completed_modules') }}" class="btn btn-outline-secondary w-100">Clear Filters</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- Modules List -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <div class="card-body p-0">
+                <table class="table table-striped table-hover mb-0" id="moduleTable">
+                    <thead class="thead-light sticky-top bg-white">
+                        <tr>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('admin.view_completed_modules', sort='module_code',
+                                           direction='desc' if sort_by == 'module_code' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Code</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_code' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 200px">
+                                <a href="{{ url_for('admin.view_completed_modules', sort='module_name',
+                                           direction='desc' if sort_by == 'module_name' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Name</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_name' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 150px">
+                                <a href="{{ url_for('admin.view_completed_modules', sort='module_lead',
+                                           direction='desc' if sort_by == 'module_lead' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Module Lead</span>
+                                    <i class="fas fa-sort{% if sort_by == 'module_lead' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('admin.view_completed_modules', sort='review_date',
+                                           direction='desc' if sort_by == 'review_date' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Review Date</span>
+                                    <i class="fas fa-sort{% if sort_by == 'review_date' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 150px">
+                                <a href="{{ url_for('admin.view_completed_modules', sort='reviewer_name',
+                                           direction='desc' if sort_by == 'reviewer_name' and sort_direction == 'asc' else 'asc',
+                                           search=search_query) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Reviewed By</span>
+                                    <i class="fas fa-sort{% if sort_by == 'reviewer_name' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                </a>
+                            </th>
+                            <th class="px-3 text-end" style="min-width: 100px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if modules %}
+                            {% for module in modules %}
+                            <tr>
+                                <td class="px-3">{{ module.get('module_code', 'N/A') }}</td>
+                                <td class="px-3">{{ module.get('module_name', 'N/A') }}</td>
+                                <td class="px-3">{{ module.get('module_lead', 'N/A') }}</td>
+                                <td class="px-3">{{ module.review_date|datetime }}</td>
+                                <td class="px-3">{{ module.reviewer_name or 'Unknown' }}</td>
+                                <td class="px-3 text-end">
+                                    <a href="{{ url_for('admin.view_module', module_id=module._id) }}" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-clipboard-check fa-2x mb-3"></i>
+                                        <p class="mb-0">No completed module reviews found</p>
+                                        <small class="text-muted">Completed reviews will appear here</small>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Small screen note -->
+        <div class="d-block d-md-none card-footer py-2">
+            <small class="text-muted">
+                <i class="fas fa-info-circle me-1"></i>
+                Scroll horizontally to view more columns
+            </small>
+        </div>
+
+        <!-- Pagination -->
+        {% include 'includes/pagination.html' %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="{{ url_for('static', filename='js/completed_modules.js') }}"></script>
+{% endblock %}

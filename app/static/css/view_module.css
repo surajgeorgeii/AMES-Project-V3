@@ -1,0 +1,91 @@
+.detail-item {
+    margin-bottom: 1rem;
+}
+.detail-item label {
+    margin-bottom: 0.25rem;
+    color: #6c757d;
+}
+.detail-item p {
+    margin-bottom: 0;
+}
+
+/* Add these new styles */
+.card-header.bg-primary {
+    background-color: var(--bs-primary) !important;
+}
+
+.enhancement-plan-card {
+    transition: all 0.3s ease;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.enhancement-plan-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.enhancement-plan-card .card-header {
+    background-color: rgba(var(--bs-primary-rgb), 0.1);
+    border-bottom: none;
+}
+
+.enhancement-plan-card .badge {
+    font-size: 0.75rem;
+}
+
+.enhancement-details {
+    position: relative;
+    padding-left: 1rem;
+    border-left: 3px solid var(--bs-primary);
+}
+
+/* Compact Timeline styles */
+.timeline-compact {
+    position: relative;
+    padding: 0.5rem 0;
+}
+
+.timeline-compact::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0.75rem;
+    height: 100%;
+    width: 1px;
+    background: var(--bs-secondary);
+    opacity: 0.2;
+}
+
+.timeline-item-compact {
+    position: relative;
+    padding-left: 2rem;
+    padding-bottom: 0.75rem;
+    font-size: 0.875rem;
+}
+
+.timeline-item-compact:last-child {
+    padding-bottom: 0;
+}
+
+.timeline-marker-compact {
+    position: absolute;
+    left: 0.5rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: var(--bs-secondary);
+    border: 1px solid #fff;
+}
+
+.timeline-content-compact {
+    background: rgba(var(--bs-light-rgb), 0.5);
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Remove the old timeline styles */
+.timeline, .timeline-item, .timeline-marker, .timeline-content {
+    display: none;
+}

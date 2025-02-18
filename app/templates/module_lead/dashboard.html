@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block head %}
+{{ super() }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-0">{{ current_user.username }}'s Dashboard</h2>
+            <p class="text-muted mb-0">Academic Year: {{ get_academic_year() }}/{{ get_academic_year() + 1 }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary" id="refreshDashboard">
+                <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+        </div>
+    </div>
+    
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('module_lead.view_your_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Your Modules</h6>
+                            <h3 id="yourModules" class="mb-0">{{ stats.get('user_total', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-info bg-opacity-10 p-3">
+                            <i class="fas fa-user-graduate fa-2x text-info"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('module_lead.view_completed_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Completed Reviews</h6>
+                            <h3 id="completedReviews" class="mb-0">{{ stats.get('completed', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('module_lead.view_pending_modules') }}'">
+                    <div class="card-body bg-gradient p-3">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-muted mb-1">Pending Reviews</h6>
+                                <h3 id="pendingReviews" class="mb-0">{{ stats.get('pending', 0) }}</h3>
+                            </div>
+                            <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                                <i class="fas fa-clock fa-2x text-warning"></i>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card shadow-sm border-0 clickable-card" 
+                 onclick="window.location.href='{{ url_for('module_lead.view_all_modules') }}'">
+                <div class="card-body bg-gradient p-3">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Modules</h6>
+                            <h3 id="totalModules" class="mb-0">{{ stats.get('total', 0) }}</h3>
+                        </div>
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="fas fa-book fa-2x text-primary"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Charts -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title">All Modules Review Status</h5>
+                    <small class="text-muted">Distribution of all module reviews</small>
+                </div>
+                <div class="card-body">
+                    <div id="modulesPieChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white border-0">
+                    <h5 class="card-title">Your Modules Review Status</h5>
+                    <small class="text-muted">Distribution of your module reviews</small>
+                </div>
+                <div class="card-body">
+                    <div id="myModulesPieChart" class="chart-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script id="dashboardStats" type="application/json">
+    {{ stats | tojson | safe }}
+</script>
+<script src="{{ url_for('static', filename='js/ml_dashboard.js') }}" defer></script>
+{% endblock %}

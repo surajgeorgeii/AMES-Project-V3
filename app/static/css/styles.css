@@ -1,0 +1,256 @@
+:root {
+    --primary-color: #2c3e50;
+    --primary-light: #34495e;
+    --secondary-color: #3498db;
+    --accent-color: #e74c3c;
+    --background-light: #f8f9fa;
+    --text-dark: #2c3e50;
+    --text-light: #ffffff;
+    --success-color: #2ecc71;
+    --warning-color: #f1c40f;
+    --danger-color: #e74c3c;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    background-color: var(--background-light);
+    color: var(--text-dark);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: var(--primary-color) !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1rem 0;
+}
+
+.navbar-dark .navbar-brand {
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.navbar-brand {
+    font-weight: 600;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    color: var(--text-light) !important;
+    transition: opacity 0.3s ease;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    opacity: 0.8;
+}
+
+.btn-primary {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-light);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.card {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 1rem 1.25rem;
+    border-bottom: none;
+}
+
+.form-control:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.bg-primary {
+    background-color: var(--primary-color) !important;
+}
+
+.text-white {
+    color: var(--text-light) !important;
+}
+
+.container {
+    flex: 1;
+}
+
+.footer {
+    background-color: var(--secondary-color) !important;
+    color: var(--text-light);
+    padding: 2rem 0;
+    text-align: center;
+}
+
+/* Dashboard specific styles */
+.card-title {
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.card-text {
+    color: var(--text-dark);
+    opacity: 0.8;
+}
+
+.clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.clickable-row:hover {
+    background-color: rgba(0,0,0,0.075) !important;
+}
+
+/* Enhanced toast styling */
+.toast {
+    min-width: 300px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.toast-header {
+    border-bottom: none;
+}
+
+/* Enhanced loading overlay styling */
+#globalSpinner {
+    backdrop-filter: blur(5px);
+    transition: opacity 0.3s ease-in-out;
+}
+
+.progress {
+    height: 0.5rem;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar {
+    transition: width 0.3s ease-in-out;
+}
+
+/* Enhanced toast container styling */
+.toast-container {
+    min-width: 350px;
+    z-index: 1500;
+}
+
+.toast {
+    opacity: 1 !important;
+    border: none;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(10px);
+}
+
+/* Enhanced loading overlay styling */
+#globalSpinner {
+    backdrop-filter: blur(8px);
+    transition: all 0.3s ease-in-out;
+}
+
+.progress {
+    height: 0.5rem;
+    border-radius: 1rem;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.progress-bar {
+    transition: width 0.3s ease-in-out;
+    background-color: var(--bs-primary);
+}
+
+/* Add these new styles */
+.modal-lg {
+    max-width: 800px;
+}
+
+#uploadSummaryModal .card {
+    border: none;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+#uploadSummaryModal .border {
+    border-color: #dee2e6 !important;
+}
+
+#uploadSummaryModal h3 {
+    color: var(--bs-primary);
+    margin-bottom: 0.5rem;
+}
+
+#uploadSummaryModal .alert ul {
+    padding-left: 1.5rem;
+}
+
+/* Academic Year Selector */
+#academicYear {
+    background-color: var(--primary-light);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: var(--text-light);
+    min-width: 150px;
+    font-weight: 500;
+}
+
+#academicYear:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+#academicYear option {
+    background-color: var(--background-light);
+    color: var(--text-dark);
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    backdrop-filter: blur(5px);
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+}
+
+/* Custom Container */
+.content-container {
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    margin-top: 2rem;
+}
+
+/* Utility Classes */
+.text-muted-light {
+    color: rgba(255,255,255,0.7) !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}

@@ -1,0 +1,46 @@
+services:
+  ames_platform:
+    env_file:
+      - app/.env
+    build: .
+    container_name: ames_platform
+    ports:
+      - "5000:5000"
+    networks:
+      - ames_network
+  mailhog:
+    image: mailhog/mailhog
+    container_name: ames_mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"  
+    networks:
+      - ames_network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8025"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  mongo:
+    image: mongo
+    container_name: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    networks:
+      - ames_network
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+networks:
+  ames_network:
+    driver: bridge
+
+volumes:
+  mongo_data: 
