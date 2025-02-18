@@ -4,16 +4,28 @@
         <ul class="pagination justify-content-end mb-0">
             <!-- Previous button -->
             <li class="page-item {{ 'disabled' if page == 1 }}">
-                <a class="page-link" href="{{ url_for(request.endpoint, page=page-1, 
-                   search=search_query, sort=sort_by, direction=sort_direction) }}"
-                   {% if page == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>Previous</a>
+                <a class="page-link" href="{{ url_for(request.endpoint, 
+                    page=page-1,
+                    search=search_query,
+                    status=status_filter,
+                    code_prefix=code_prefix,
+                    sort=sort_by,
+                    direction=sort_direction) }}"
+                    {% if page == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>
+                    Previous
+                </a>
             </li>
 
             <!-- First page -->
             {% if page > 2 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for(request.endpoint, page=1,
-                   search=search_query, sort=sort_by, direction=sort_direction) }}">1</a>
+                <a class="page-link" href="{{ url_for(request.endpoint,
+                    page=1,
+                    search=search_query,
+                    status=status_filter,
+                    code_prefix=code_prefix,
+                    sort=sort_by,
+                    direction=sort_direction) }}">1</a>
             </li>
             {% endif %}
 
@@ -24,12 +36,19 @@
             </li>
             {% endif %}
 
-            <!-- Current page and surrounding pages -->
-            {% for p in range(max(1, page - 1), min(total_pages + 1, page + 2)) %}
-            <li class="page-item {{ 'active' if p == page }}">
-                <a class="page-link" href="{{ url_for(request.endpoint, page=p,
-                   search=search_query, sort=sort_by, direction=sort_direction) }}">{{ p }}</a>
-            </li>
+            <!-- Current page and neighbors -->
+            {% for p in range(page|int - 1, page|int + 2) %}
+                {% if p > 0 and p <= total_pages %}
+                <li class="page-item {{ 'active' if p == page }}">
+                    <a class="page-link" href="{{ url_for(request.endpoint,
+                        page=p,
+                        search=search_query,
+                        status=status_filter,
+                        code_prefix=code_prefix,
+                        sort=sort_by,
+                        direction=sort_direction) }}">{{ p }}</a>
+                </li>
+                {% endif %}
             {% endfor %}
 
             <!-- Ellipsis if needed -->
@@ -42,16 +61,28 @@
             <!-- Last page -->
             {% if page < total_pages - 1 %}
             <li class="page-item">
-                <a class="page-link" href="{{ url_for(request.endpoint, page=total_pages,
-                   search=search_query, sort=sort_by, direction=sort_direction) }}">{{ total_pages }}</a>
+                <a class="page-link" href="{{ url_for(request.endpoint,
+                    page=total_pages,
+                    search=search_query,
+                    status=status_filter,
+                    code_prefix=code_prefix,
+                    sort=sort_by,
+                    direction=sort_direction) }}">{{ total_pages }}</a>
             </li>
             {% endif %}
 
             <!-- Next button -->
             <li class="page-item {{ 'disabled' if page == total_pages }}">
-                <a class="page-link" href="{{ url_for(request.endpoint, page=page+1,
-                   search=search_query, sort=sort_by, direction=sort_direction) }}"
-                   {% if page == total_pages %}tabindex="-1" aria-disabled="true"{% endif %}>Next</a>
+                <a class="page-link" href="{{ url_for(request.endpoint,
+                    page=page+1,
+                    search=search_query,
+                    status=status_filter,
+                    code_prefix=code_prefix,
+                    sort=sort_by,
+                    direction=sort_direction) }}"
+                    {% if page == total_pages %}tabindex="-1" aria-disabled="true"{% endif %}>
+                    Next
+                </a>
             </li>
         </ul>
     </nav>
