@@ -790,3 +790,32 @@ function hideLoading() {
         loadingRow.parentElement.parentElement.remove();
     }
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+
+    // Update search form to preserve all parameters
+    const searchForm = document.getElementById('searchForm');
+    if (searchForm) {
+        searchForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const params = new URLSearchParams();
+            
+            for (let pair of formData.entries()) {
+                if (pair[1]) {  // Only add non-empty values
+                    params.append(pair[0], pair[1]);
+                }
+            }
+            
+            // Add current page if it exists in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('page')) {
+                params.append('page', '1');  // Reset to page 1 when searching
+            }
+            
+            // Redirect with all parameters
+            window.location.href = ${window.location.pathname}?${params.toString()};
+        });
+    }
+});
