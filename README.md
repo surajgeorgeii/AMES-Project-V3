@@ -109,5 +109,3 @@ The API base URL is `http://localhost:5000/api`
 5. Create a Pull Request
 
 ## License
-
-This project is licensed under the MIT License.
