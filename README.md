@@ -21,7 +21,7 @@ AMES Platform is a Flask-based web application for academic module evaluation an
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone <https://github.com/surajgeorgeii/AMES-Project-V3.git>
 cd AMES-Project-V3
 ```
 
