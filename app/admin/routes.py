@@ -387,7 +387,8 @@ def view_modules():
         if reviewer_ids:
             try:
                 users_response = make_request('GET', '/users', params={
-                    'ids': list(reviewer_ids)
+                    'ids': list(reviewer_ids),
+                     'per_page': 0 
                 })
                 if users_response.status_code == 200:
                     users_data = users_response.json().get('data', {}).get('items', [])
@@ -447,7 +448,7 @@ def view_completed_modules():
     sort_by = request.args.get("sort", "review_date")
     sort_direction = request.args.get("direction", "desc")
     page = request.args.get("page", 1, type=int)
-    per_page = 10
+    per_page = 20
     code_prefix = request.args.get("code_prefix", "").strip()
 
     # Get current academic year from global setting
@@ -482,7 +483,10 @@ def view_completed_modules():
             reviewers = {}
             
             if reviewer_ids:
-                users_response = make_request('GET', '/users')
+                users_response = make_request('GET', '/users', params={
+                    'ids': list(reviewer_ids),
+                    'per_page': 0  
+                })
                 if users_response.status_code == 200:
                     users = users_response.json().get('data', {}).get('items', [])
                     reviewers = {str(user.get('_id', {}).get('$oid')): user.get('username') for user in users}
@@ -1102,7 +1106,7 @@ def get_editor_names(edit_history):
     try:
         editor_ids = [str(edit['editor_id']) for edit in edit_history if 'editor_id' in edit]
         if editor_ids:
-            response = make_request('GET', '/users', params={'ids': editor_ids})
+            response = make_request('GET', '/users', params={'ids': editor_ids, 'per_page': 0})
             if response.status_code == 200:
                 users = response.json().get('data', {}).get('items', [])
                 editor_names = {
@@ -1146,7 +1150,7 @@ def edit_module(module_id):
             'is_active': True,
             'sort': 'username',
             'direction': 'asc',
-            'per_page': 1000 
+            'per_page':0 
         })
 
         if not leads_response.ok:
