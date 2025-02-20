@@ -110,4 +110,4 @@ The API base URL is `http://localhost:5000/api`
 
 ## License
 
-This project is licensed under the MIT License.
+
