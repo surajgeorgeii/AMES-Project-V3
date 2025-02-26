@@ -121,8 +121,9 @@ class UserResource(Resource):
             # Regular paginated list request
             page = int(request.args.get("page", 1))
             per_page = int(request.args.get("per_page", 10))
-
             search = request.args.get("search", "")
+            sort_by = request.args.get("sort", "username")
+            sort_direction = -1 if request.args.get("direction") == "desc" else 1
 
             query = {}
             if search:
@@ -137,7 +138,13 @@ class UserResource(Resource):
                 query["is_active"] = is_active == "True"
 
             total = User.collection.count_documents(query)
-            users = User.get_all_users(query=query, skip=(page - 1) * per_page, limit=per_page)
+            
+            # Add sort to the query
+            cursor = User.collection.find(query)
+            cursor = cursor.sort(sort_by, sort_direction)
+            cursor = cursor.skip((page - 1) * per_page).limit(per_page)
+            
+            users = list(cursor)
             
             return format_response({
                 "items": users,
@@ -145,6 +152,7 @@ class UserResource(Resource):
                 "page": page,
                 "per_page": per_page
             })
+            
         except Exception as e:
             return format_response(None, str(e), False), 500
 
