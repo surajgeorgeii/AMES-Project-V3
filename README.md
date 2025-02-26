@@ -21,7 +21,7 @@ AMES Platform is a Flask-based web application for academic module evaluation an
 
 1. Clone the repository:
 ```bash
-git clone <repository-url>
+git clone <https://github.com/surajgeorgeii/AMES-Project-V3.git>
 cd AMES-Project-V3
 ```
 
@@ -109,3 +109,8 @@ The API base URL is `http://localhost:5000/api`
 5. Create a Pull Request
 
 ## License
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> b7e8516663cae344e69e5361521c16555c082fb5
