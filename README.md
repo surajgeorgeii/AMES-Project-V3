@@ -109,8 +109,5 @@ The API base URL is `http://localhost:5000/api`
 5. Create a Pull Request
 
 ## License
-<<<<<<< HEAD
-=======
 
 
->>>>>>> b7e8516663cae344e69e5361521c16555c082fb5
