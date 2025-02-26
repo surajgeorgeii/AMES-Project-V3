@@ -166,25 +166,65 @@
                     <thead class="thead-light sticky-top bg-white">
                         <tr>
                             <th class="px-3" style="min-width: 150px">
-                                <a href="{{ url_for('admin.view_users', sort='username',
+                                <a href="{{ url_for('admin.view_users', 
+                                           sort='username',
                                            direction='desc' if sort_by == 'username' and sort_direction == 'asc' else 'asc',
-                                           search=search_query, status=status_filter) }}" 
+                                           search=search_query, 
+                                           status=status_filter) }}" 
                                    class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
                                     <span>Username</span>
-                                    <i class="fas fa-sort{% if sort_by == 'username' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                    {% if sort_by == 'username' %}
+                                        <i class="fas fa-sort-{{ sort_direction }}"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
                                 </a>
                             </th>
                             <th class="px-3" style="min-width: 200px">
-                                <a href="{{ url_for('admin.view_users', sort='email',
+                                <a href="{{ url_for('admin.view_users', 
+                                           sort='email',
                                            direction='desc' if sort_by == 'email' and sort_direction == 'asc' else 'asc',
-                                           search=search_query, status=status_filter) }}" 
+                                           search=search_query, 
+                                           status=status_filter) }}" 
                                    class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
                                     <span>Email</span>
-                                    <i class="fas fa-sort{% if sort_by == 'email' %}{{ '-' + sort_direction }}{% endif %} ms-2"></i>
+                                    {% if sort_by == 'email' %}
+                                        <i class="fas fa-sort-{{ sort_direction }}"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
                                 </a>
                             </th>
-                            <th class="px-3" style="min-width: 120px">Role</th>
-                            <th class="px-3" style="min-width: 100px">Status</th>
+                            <th class="px-3" style="min-width: 120px">
+                                <a href="{{ url_for('admin.view_users', 
+                                           sort='role',
+                                           direction='desc' if sort_by == 'role' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, 
+                                           status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Role</span>
+                                    {% if sort_by == 'role' %}
+                                        <i class="fas fa-sort-{{ sort_direction }}"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="px-3" style="min-width: 100px">
+                                <a href="{{ url_for('admin.view_users', 
+                                           sort='is_active',
+                                           direction='desc' if sort_by == 'is_active' and sort_direction == 'asc' else 'asc',
+                                           search=search_query, 
+                                           status=status_filter) }}" 
+                                   class="text-decoration-none text-dark d-flex align-items-center justify-content-between">
+                                    <span>Status</span>
+                                    {% if sort_by == 'is_active' %}
+                                        <i class="fas fa-sort-{{ sort_direction }}"></i>
+                                    {% else %}
+                                        <i class="fas fa-sort text-muted"></i>
+                                    {% endif %}
+                                </a>
+                            </th>
                             <th class="px-3" style="width: 100px">Actions</th>
                         </tr>
                     </thead>
@@ -272,7 +312,7 @@
         </div>
 
         <!-- Pagination -->
-        {% include 'includes/pagination.html' %}
+        {% include 'includes/pagination.html' %}
     </div>
 </div>
 {% endblock %}
