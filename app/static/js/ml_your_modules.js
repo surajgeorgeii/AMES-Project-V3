@@ -96,15 +96,8 @@ function updateTableContent(html) {
 }
 
 function setupTableInteractions() {
-    // Setup clickable rows
-    document.querySelectorAll('.clickable-row').forEach(row => {
-        row.addEventListener('click', function(e) {
-            if (!e.target.closest('a')) {
-                window.location = this.dataset.href || this.getAttribute('onclick').match(/'([^']+)'/)[1];
-            }
-        });
-    });
-
+    // Setup clickable rows now handled in inline script
+    
     // Setup pagination
     document.querySelectorAll('.pagination .page-link').forEach(link => {
         link.addEventListener('click', function(e) {
