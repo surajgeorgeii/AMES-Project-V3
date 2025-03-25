@@ -18,8 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const radius = Math.min(config.width, config.height) / 2.5;
         const moduleData = [
             { label: 'Completed Reviews', value: stats.completed_reviews, color: '#1cc88a' },  // Green
-            { label: 'Pending Reviews', value: stats.pending_reviews, color: '#f6c23e' },      // Yellow
-            { label: 'Total Modules', value: stats.total_modules, color: '#4e73df' }           // Blue
+            { label: 'Pending Reviews', value: stats.pending_reviews, color: '#f6c23e' }       // Yellow
         ];
 
         const svg = d3.select("#modulesPieChart")
