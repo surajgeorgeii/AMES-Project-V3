@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         moduleTable.innerHTML = modules.map(module => `
-            <tr>
+            <tr style="cursor: pointer;" onclick="window.location='/admin/modules/${module._id.$oid}/view'">
                 <td>${module.module_code || 'N/A'}</td>
                 <td>${module.module_name || 'N/A'}</td>
                 <td>${module.module_lead || 'N/A'}</td>
