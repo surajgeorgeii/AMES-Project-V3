@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Review button handling
     setupReviewButtons();
+    
+    // Setup clickable rows - make sure this runs on initial page load
+    setupClickableRows();
 });
 
 function setupReviewButtons() {
@@ -98,6 +101,7 @@ async function loadModulesTable(page = 1, search = '', sort = currentSort, direc
         // Reinitialize event listeners
         setupReviewButtons();
         setupPagination();
+        setupClickableRows();  // Make sure this runs after table content is updated
         
     } catch (error) {
         showToast('Error loading modules', 'danger');
@@ -333,4 +337,28 @@ function updateURL(params) {
         }
     });
     window.history.pushState({}, '', url);
+}
+
+function setupClickableRows() {
+    document.querySelectorAll('.clickable-row').forEach(row => {
+        // Remove any existing click event listeners
+        row.removeEventListener('click', handleRowClick);
+        // Add new click event listener
+        row.addEventListener('click', handleRowClick);
+    });
+}
+
+function handleRowClick(e) {
+    // Don't navigate if clicking on a checkbox, button or link
+    if (e.target.closest('input[type="checkbox"]') || 
+        e.target.closest('button') || 
+        e.target.closest('a')) {
+        return;
+    }
+    
+    // Get the URL from the row's data attribute and navigate
+    const url = this.getAttribute('data-url');
+    if (url) {
+        window.location.href = url;
+    }
 }
