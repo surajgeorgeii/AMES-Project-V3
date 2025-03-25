@@ -178,7 +178,7 @@ def view_all_modules():
             try:
                 users_response = make_request('GET', '/users', params={
                     'ids': list(reviewer_ids),
-                    'per_page': 0 
+                    'per_page': 0  
                 })
                 if users_response.status_code == 200:
                     users_data = users_response.json().get('data', {}).get('items', [])
@@ -529,7 +529,7 @@ def review_module(module_id):
             res = make_request('POST', '/reviews', json=review_data)
             if res.status_code == 201:
                 flash("Module review submitted successfully", "success")
-                return redirect(url_for("module_lead.view_completed_modules"))  # Changed redirect target
+                return redirect(url_for("module_lead.view_module", module_id=clean_id))  # Redirect to view_module
             else:
                 error_data = res.json()
                 flash(error_data.get('message', 'Error submitting review'), "danger")
@@ -799,7 +799,7 @@ def get_editor_names(edit_history):
     try:
         editor_ids = [str(edit['editor_id']) for edit in edit_history if 'editor_id' in edit]
         if editor_ids:
-            response = make_request('GET', '/users', params={'ids': editor_ids,'per_page': 0})
+            response = make_request('GET', '/users', params={'ids': editor_ids,'per_page': 0} )
             if response.status_code == 200:
                 users = response.json().get('data', {}).get('items', [])
                 editor_names = {
