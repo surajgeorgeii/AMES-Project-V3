@@ -9,9 +9,14 @@
             <h2>Completed Module Reviews (<span id="totalModules">{{ total_modules }}</span>)</h2>
             <p class="text-muted mb-0">Academic Year: {{ get_academic_year() }}/{{ get_academic_year() + 1 }}</p>
         </div>
-        <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Back to All Modules
-        </a>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to All Modules
+            </a>
+        </div>
     </div>
 
     <!-- Search and Filters Section -->
@@ -109,7 +114,7 @@
                     <tbody>
                         {% if modules %}
                             {% for module in modules %}
-                            <tr>
+                            <tr onclick="window.location='{{ url_for('admin.view_module', module_id=module._id) }}'" style="cursor: pointer;">
                                 <td class="px-3">{{ module.get('module_code', 'N/A') }}</td>
                                 <td class="px-3">{{ module.get('module_name', 'N/A') }}</td>
                                 <td class="px-3">{{ module.get('module_lead', 'N/A') }}</td>
