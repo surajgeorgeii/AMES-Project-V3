@@ -815,7 +815,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // Redirect with all parameters
-            window.location.href = ${window.location.pathname}?${params.toString()};
+            window.location.href = `${window.location.pathname}?${params.toString()}`;
         });
     }
 });
