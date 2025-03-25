@@ -9,9 +9,14 @@
             <h2>Pending Module Reviews (<span id="totalModules">{{ total_modules }}</span>)</h2>
             <p class="text-muted mb-0">Academic Year: {{ get_academic_year() }}/{{ get_academic_year() + 1 }}</p>
         </div>
-        <a href="{{ url_for('admin.view_modules') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-1"></i> Back to All Modules
-        </a>
+        <div>
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Back to Dashboard
+            </a>
+            <a href="{{ url_for('admin.export_pending_modules') }}" class="btn btn-outline-success">
+                <i class="fas fa-file-excel me-1"></i> Export to Excel
+            </a>
+        </div>
     </div>
     
     <!-- Search and Filters Section -->
@@ -150,13 +155,13 @@
                     <tbody>
                         {% for module in modules %}
                             <tr class="clickable-row" 
-                                onclick="window.location='{{ url_for('admin.review_module', module_id=module._id) }}'"
+                                data-url="{{ url_for('admin.review_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}"
                                 style="cursor: pointer">
                                 <td class="px-3">
                                     <div class="d-flex align-items-center">
                                         <input type="checkbox" 
                                                class="module-checkbox me-3" 
-                                               value="{{ module._id }}"
+                                               value="{{ module._id['$oid'] if module._id is mapping else module._id }}"
                                                onclick="event.stopPropagation()">
                                         <div class="text-truncate" style="max-width: 200px" title="{{ module.module_code }}">
                                             {{ module.module_code }}
@@ -179,12 +184,7 @@
                                     </div>
                                 </td>
                                 <td class="px-3 text-end" onclick="event.stopPropagation()">
-                                    {% if module._id is string %}
-                                        {% set module_id = module._id %}
-                                    {% else %}
-                                        {% set module_id = module._id['$oid'] %}
-                                    {% endif %}
-                                    <a href="{{ url_for('admin.review_module', module_id=module_id) }}" 
+                                    <a href="{{ url_for('admin.review_module', module_id=module._id['$oid'] if module._id is mapping else module._id) }}" 
                                        class="btn btn-sm btn-primary"
                                        title="Review module">
                                         <i class="fas fa-edit me-1"></i> Review
@@ -355,6 +355,24 @@
                 updateSelectedCount();
             }
         });
+        
+        // Make table rows clickable to navigate to review module page
+        document.querySelectorAll('.clickable-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Don't navigate if clicking on a checkbox, button or link
+                if (e.target.closest('input[type="checkbox"]') || 
+                    e.target.closest('button') || 
+                    e.target.closest('a')) {
+                    return;
+                }
+                
+                // Navigate to the URL in data-url attribute
+                const url = this.getAttribute('data-url');
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
     });
 </script>
 <script src="{{ url_for('static', filename='js/pending_modules.js') }}"></script>
@@ -415,6 +433,16 @@
     .action-buttons .btn {
         min-width: 140px;
         transition: all 0.2s ease;
+    }
+
+    /* Add cursor style for clickable rows */
+    .clickable-row {
+        cursor: pointer;
+    }
+    
+    /* Highlight row on hover */
+    .clickable-row:hover {
+        background-color: rgba(0,0,0,0.05);
     }
 </style>
 {% endblock %}
