@@ -57,13 +57,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         moduleTable.innerHTML = modules.map(module => `
-            <tr>
-                <td>${module.module_code || 'N/A'}</td>
-                <td>${module.module_name || 'N/A'}</td>
-                <td>${module.module_lead || 'N/A'}</td>
-                <td>${formatDate(module.review_date?.$date)}</td>
-                <td>${module.reviewer_name || 'Unknown'}</td>
-                <td>
+            <tr class="table-row" data-url="/module-lead/modules/${module._id.$oid}/view">
+                <td class="px-3">${module.module_code || 'N/A'}</td>
+                <td class="px-3">${module.module_name || 'N/A'}</td>
+                <td class="px-3">${module.module_lead || 'N/A'}</td>
+                <td class="px-3">${formatDate(module.review_date?.$date)}</td>
+                <td class="px-3">${module.reviewer_name || 'Unknown'}</td>
+                <td class="px-3 text-end" onclick="event.stopPropagation()">
                     <a href="/module-lead/modules/${module._id.$oid}/view" 
                        class="btn btn-sm btn-outline-primary">
                         <i class="fas fa-eye"></i> View
@@ -71,6 +71,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 </td>
             </tr>
         `).join('');
+        
+        // Reinitialize the row click handlers after rendering
+        initializeRowClickHandlers();
+    }
+
+    // Function to initialize click handlers for table rows
+    function initializeRowClickHandlers() {
+        document.querySelectorAll('.table-row').forEach(row => {
+            row.addEventListener('click', function(e) {
+                // Prevent navigation when clicking action buttons
+                if (e.target.closest('.btn-group') || e.target.closest('a') || e.target.closest('button')) {
+                    return;
+                }
+                
+                const url = this.dataset.url;
+                if (url) {
+                    window.location.href = url;
+                }
+            });
+        });
     }
 
     function showError(message) {
