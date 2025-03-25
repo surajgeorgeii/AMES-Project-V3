@@ -124,4 +124,15 @@
     {{ stats | tojson | safe }}
 </script>
 <script src="{{ url_for('static', filename='js/ml_dashboard.js') }}" defer></script>
+<style>
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .clickable-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
 {% endblock %}
