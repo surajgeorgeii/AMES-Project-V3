@@ -102,18 +102,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-6 col-md-12 mb-4">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-header bg-white border-0">
-                    <h5 class="card-title">User Distribution</h5>
-                    <small class="text-muted">Admins vs. Module Leads</small>
-                </div>
-                <div class="card-body">
-                    <div id="usersBarChart" class="chart-container"></div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}
@@ -121,7 +109,10 @@
 {% block scripts %}
 {{ super() }}
 <script id="dashboardStats" type="application/json">
-    {{ stats | tojson | safe }}
+{
+    "completed_reviews": {{ stats.get('completed_reviews', 0) }},
+    "pending_reviews": {{ stats.get('pending_reviews', 0) }}
+}
 </script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
 <script>
@@ -132,4 +123,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
+<style>
+    .clickable-card {
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .clickable-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    }
+</style>
 {% endblock %}
