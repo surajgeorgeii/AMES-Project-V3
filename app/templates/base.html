@@ -50,6 +50,7 @@
                     {% if current_user.is_authenticated %}
                         <li class="nav-item me-3">
                             <div class="d-flex align-items-center">
+                                <i class="bi bi-calendar-event me-2 text-light"></i>
                                 {% set current_year = get_academic_year() %}
                                 <select id="academicYear" class="form-select form-select-sm">
                                     {% for year in range(2020, 2050) %}
