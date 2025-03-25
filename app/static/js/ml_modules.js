@@ -61,7 +61,27 @@ document.addEventListener('DOMContentLoaded', function() {
             applyFilters();
         });
     });
+
+    // Initialize row click handlers
+    initializeRowClickHandlers();
 });
+
+// Initialize click handlers for table rows
+function initializeRowClickHandlers() {
+    document.querySelectorAll('.table-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Prevent navigation when clicking action buttons
+            if (e.target.closest('.btn-group')) {
+                return;
+            }
+            
+            const url = this.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
+}
 
 function applyFilters() {
     const params = new URLSearchParams();
@@ -106,6 +126,8 @@ function applyFilters() {
         console.log('Received data:', data);
         if (data.success) {
             updateTable(data.data.items);
+            // After updating the table, reinitialize the row click handlers
+            initializeRowClickHandlers();
             if (data.data.total !== undefined) {
                 document.querySelector('h3').textContent = `All Modules (${data.data.total})`;
             }
@@ -151,8 +173,16 @@ function updateTable(modules) {
             moduleId = '';
         }
 
+        // Get reviewer name
+        const reviewerName = module.reviewer_name || 'N/A';
+
+        // Add data-url attribute to the row for navigation
+        const dataUrl = module.review_submitted 
+            ? `/module-lead/modules/${moduleId}/view` 
+            : `/module-lead/modules/${moduleId}/review`;
+
         return `
-            <tr>
+            <tr class="table-row" data-url="${dataUrl}">
                 <td class="px-3">
                     <div class="text-truncate" style="max-width: 200px" title="${module.module_code || ''}">
                         ${module.module_code || 'N/A'}
@@ -241,4 +271,25 @@ function createToastContainer() {
     container.style.zIndex = '1050';
     document.body.appendChild(container);
     return container;
+}
+
+// Add loading indicator functions if not already defined
+function showLoading() {
+    const tableBody = document.querySelector('.table tbody');
+    if (tableBody) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center py-4">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2">Loading modules...</p>
+                </td>
+            </tr>
+        `;
+    }
+}
+
+function hideLoading() {
+    // No need to do anything specific here as the table is completely replaced when data loads
 }
