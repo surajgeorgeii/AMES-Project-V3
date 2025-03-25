@@ -98,6 +98,7 @@ async function loadModulesTable(page = 1, search = '', sort = currentSort, direc
         // Reinitialize event listeners
         setupReviewButtons();
         setupPagination();
+        setupRowClickHandlers(); // Add this line to reinitialize row click handlers
         
     } catch (error) {
         showToast('Error loading modules', 'danger');
@@ -105,6 +106,23 @@ async function loadModulesTable(page = 1, search = '', sort = currentSort, direc
     } finally {
         showLoading(false);
     }
+}
+
+// Add this new function
+function setupRowClickHandlers() {
+    document.querySelectorAll('.table-row').forEach(row => {
+        row.addEventListener('click', function(e) {
+            // Prevent navigation when clicking action buttons
+            if (e.target.closest('.btn-group') || e.target.closest('a') || e.target.closest('button')) {
+                return;
+            }
+            
+            const url = this.dataset.url;
+            if (url) {
+                window.location.href = url;
+            }
+        });
+    });
 }
 
 function setupPagination() {
