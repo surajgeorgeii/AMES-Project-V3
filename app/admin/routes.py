@@ -12,8 +12,10 @@ from flask_wtf import FlaskForm
 from base.utils import get_academic_year
 import logging as logger
 from .resources import ModuleReminderResource
-from utils.email import send_custom_email  # Add this import at the top
 from .resources import UserEmailResource
+import pandas as pd  
+from io import BytesIO 
+from flask import send_file  
 
 # API configuration
 API_BASE_URL = "http://localhost:5000/admin/api"
@@ -123,7 +125,7 @@ def view_users():
     sort_by = request.args.get("sort", "username")
     sort_direction = request.args.get("direction", "asc")
     page = request.args.get("page", 1, type=int)
-    per_page = 10
+    per_page = 20
 
     params = {
         "search": search_query,
@@ -388,7 +390,7 @@ def view_modules():
             try:
                 users_response = make_request('GET', '/users', params={
                     'ids': list(reviewer_ids),
-                     'per_page': 0 
+                    'per_page': 0  
                 })
                 if users_response.status_code == 200:
                     users_data = users_response.json().get('data', {}).get('items', [])
@@ -837,7 +839,7 @@ def review_module(module_id):
             res = make_request('POST', '/reviews', json=review_data)
             if res.status_code == 201:
                 flash("Module review submitted successfully", "success")
-                return redirect(url_for("admin.view_completed_modules"))  # Changed redirect target
+                return redirect(url_for("admin.view_module", module_id=clean_id))  # Updated redirect target
             else:
                 error_data = res.json()
                 flash(error_data.get('message', 'Error submitting review'), "danger")
@@ -1150,7 +1152,7 @@ def edit_module(module_id):
             'is_active': True,
             'sort': 'username',
             'direction': 'asc',
-            'per_page':0 
+            'per_page': 0 
         })
 
         if not leads_response.ok:
@@ -1251,3 +1253,79 @@ def send_reminder():
             "success": False,
             "message": f"Server error: {str(e)}"
         }), 500
+
+
+@admin_bp.route("/modules/export", methods=["GET"])
+@login_required
+@admin_required
+def export_pending_modules():
+    """Export pending modules to an Excel file."""
+    try:
+        current_academic_year = get_academic_year()
+        response = make_request('GET', '/modules', params={
+            "review_submitted": False,  
+            "academic_year": current_academic_year,
+            "per_page": 1000
+        })
+
+        if response.status_code != 200:
+            flash("Error fetching pending modules for export", "danger")
+            return redirect(url_for('admin.view_pending_modules'))
+
+        data = response.json().get('data', {})
+        modules = data.get('items', [])
+        
+        modules = [m for m in modules if not m.get("review_submitted", False)]
+
+        rows = []
+        for module in modules:
+            rows.append({
+                "Academic Year": f"{module.get('academic_year')} - {int(module.get('academic_year')) + 1}" if module.get('academic_year') else "N/A",
+                "Module Code": module.get("module_code", ""),
+                "Module Name": module.get("module_name", ""),
+                "Module Lead": module.get("module_lead") or "Not Assigned",
+                "Level": module.get("level") or "N/A",
+                "Email ID": module.get("module_lead_email") or "N/A",
+                "Review Status": "Pending" 
+            })
+
+        df = pd.DataFrame(rows)
+
+        # Add a title with export information
+        export_info = [
+            ["Pending Modules Export"],
+            [f"Academic Year: {current_academic_year} - {int(current_academic_year) + 1}"],
+            [f"Export Date: {datetime.now().strftime('%Y-%m-%d %H:%M')}"],
+            [f"Total Pending Modules: {len(rows)}"],
+            [""]  # Empty row before the data
+        ]
+        info_df = pd.DataFrame(export_info)
+
+        # Combine into a single Excel file
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # Write the info section
+            info_df.to_excel(writer, index=False, header=False, sheet_name="Pending Modules")
+            
+            # Write the data section starting a few rows down
+            df.to_excel(writer, index=False, sheet_name="Pending Modules", startrow=len(export_info))
+            
+            worksheet = writer.sheets["Pending Modules"]
+            for i, col in enumerate(df.columns):
+                max_len = max(df[col].astype(str).map(len).max(), len(col)) + 2
+                worksheet.set_column(i, i, max_len)
+
+        output.seek(0)
+        timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M")
+        filename = f"Pending_Modules_{timestamp}.xlsx"
+
+        return send_file(
+            output,
+            mimetype="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except Exception as e:
+        flash(f"Error exporting pending modules: {str(e)}", "danger")
+        return redirect(url_for('admin.view_pending_modules'))
